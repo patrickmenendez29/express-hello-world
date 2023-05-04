@@ -1,59 +1,127 @@
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 3001;
-
-app.get("/", (req, res) => res.type('html').send(html));
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
-
-const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello from Render!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongodb_1 = require("mongodb");
+const uri = "mongodb+srv://Cluster06656:Password@cluster06656.ohufi3a.mongodb.net/?retryWrites=true&w=majority";
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new mongodb_1.MongoClient(uri, {
+    serverApi: {
+        version: mongodb_1.ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+// Connect to the MongoDB cluster
+try {
+    // Connect the client to the server	(optional starting in v4.7)
+    client.connect().then(() => {
+        console.log("Connected successfully to server");
+        client.db("admin").command({ ping: 1 }).then(() => {
+            console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        }).catch((err) => {
+            console.log("Something went wrong. Unable to ping your deployment");
+            console.log(err);
         });
-      }, 500);
-    </script>
-    <style>
-      @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
-      @font-face {
-        font-family: "neo-sans";
-        src: url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
-        font-style: normal;
-        font-weight: 700;
-      }
-      html {
-        font-family: neo-sans;
-        font-weight: 700;
-        font-size: calc(62rem / 16);
-      }
-      body {
-        background: white;
-      }
-      section {
-        border-radius: 1em;
-        padding: 1em;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
-    </style>
-  </head>
-  <body>
-    <section>
-      Hello from Render!
-    </section>
-  </body>
-</html>
-`
+    });
+    // Send a ping to confirm a successful connection
+}
+finally {
+    // Ensures that the client will close when you finish/error
+    client.close().then(() => {
+        console.log("Closed connection to server");
+    });
+}
+// For backend and express
+const express = require('express');
+const app = express();
+const cors = require("cors");
+app.use(express.json());
+app.use(cors());
+app.get("/", (req, resp) => {
+    resp.send("App is Working");
+});
+app.post("/create", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield client.db("Events").collection("Events").insertOne(req.body);
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+app.get("/getEvent", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    // get event by id in query param
+    try {
+        console.log(req.query.id);
+        // cast query param to number
+        const id = parseInt(req.query.id);
+        const coll = client.db('Events').collection('Events');
+        const cursor = coll.find({ id: id });
+        const result = yield cursor.toArray();
+        console.log(result);
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+// get all events
+app.get("/getEvents", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const coll = client.db('Events').collection('Events');
+        const cursor = coll.find();
+        const result = yield cursor.toArray();
+        console.log(result);
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+// update event by id
+app.put("/updateEvent", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.query.id);
+        const coll = client.db('Events').collection('Events');
+        const result = yield coll.updateOne({ id: id }, { $set: req.body });
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+// delete event by id
+app.delete("/deleteEvent", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.query.id);
+        const coll = client.db('Events').collection('Events');
+        const result = yield coll.deleteOne({ id: id });
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+// get events byname
+app.get("/getEventsByName", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const name = req.query.name;
+        const coll = client.db('Events').collection('Events');
+        const result = yield coll.find({ name: name }).toArray();
+        resp.send(result);
+    }
+    catch (e) {
+        resp.send("Something Went Wrong");
+    }
+}));
+// try listening in port 5000, if not available, kill the process running in port 5000
+app.listen(5001);
+console.log("App listen at port 5001");
