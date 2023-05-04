@@ -33,11 +33,8 @@ try {
     });
     // Send a ping to confirm a successful connection
 }
-finally {
-    // Ensures that the client will close when you finish/error
-    client.close().then(() => {
-        console.log("Closed connection to server");
-    });
+catch (e) {
+    console.error(e);
 }
 // For backend and express
 const express = require('express');
