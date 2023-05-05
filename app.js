@@ -82,6 +82,7 @@ app.get("/getEvents", (req, resp) => __awaiter(void 0, void 0, void 0, function*
         resp.send(result);
     }
     catch (e) {
+        console.log(e);
         resp.send("Something Went Wrong");
     }
 }));
