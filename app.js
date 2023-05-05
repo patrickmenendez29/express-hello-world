@@ -83,7 +83,7 @@ app.get("/getEvents", (req, resp) => __awaiter(void 0, void 0, void 0, function*
     }
     catch (e) {
         console.log(e);
-        resp.send("Something Went Wrong");
+        resp.send(e);
     }
 }));
 // update event by id
