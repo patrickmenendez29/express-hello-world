@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
+const port = process.env.PORT || 3001;
 const uri = "mongodb+srv://Cluster06656:Password@cluster06656.ohufi3a.mongodb.net/?retryWrites=true&w=majority";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new mongodb_1.MongoClient(uri, {
@@ -42,6 +43,7 @@ const app = express();
 const cors = require("cors");
 app.use(express.json());
 app.use(cors());
+app.options('*', cors());
 app.get("/", (req, resp) => {
     resp.send("App is Working");
 });
@@ -84,11 +86,12 @@ app.get("/getEvents", (req, resp) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 // update event by id
-app.put("/updateEvent", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/updateEvent", (req, resp) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.query.id);
         const coll = client.db('Events').collection('Events');
         const result = yield coll.updateOne({ id: id }, { $set: req.body });
+        console.log(result);
         resp.send(result);
     }
     catch (e) {
@@ -120,5 +123,6 @@ app.get("/getEventsByName", (req, resp) => __awaiter(void 0, void 0, void 0, fun
     }
 }));
 // try listening in port 5000, if not available, kill the process running in port 5000
-app.listen(5001);
-console.log("App listen at port 5001");
+app.listen(port, () => {
+    console.log(`App listen at port ${port}`);
+});
